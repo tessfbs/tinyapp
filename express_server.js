@@ -82,6 +82,14 @@ app.post("/u/:id/update", (req, res) => {
   res.redirect(`/urls/${req.params.id}`)
 })
 
+//GET /login
+app.post("/login", (req, res) => {
+  const cookieName = req.body.username
+  res.cookie('username', cookieName)
+  res.redirect("/urls")
+})
+
+// POST LOGIN
 
 
 
