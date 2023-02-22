@@ -1,3 +1,5 @@
+const cookieParser = require('cookie-parser')
+
 const express = require("express");
 
 const app = express(); //creates a new Express application that can be used to handle incoming requests and generate responses
@@ -15,6 +17,8 @@ const urlDatabase = {
 //tells the Express app to parse incoming requests with urlencoded payloads and expose the resulting object on req.body.
 app.use(express.urlencoded({ extended: true }));
 
+app.use(cookieParser())
+
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -29,17 +33,18 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req,res) => { 
-  const templateVars = {urls: urlDatabase};
+  const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
   res.render("urls_index",templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
   console.log("hello")
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies["username"] };
   res.render("urls_show", templateVars);
 });
 
@@ -82,15 +87,18 @@ app.post("/u/:id/update", (req, res) => {
   res.redirect(`/urls/${req.params.id}`)
 })
 
-//GET /login
+//post /login and save cookie
 app.post("/login", (req, res) => {
   const cookieName = req.body.username
   res.cookie('username', cookieName)
   res.redirect("/urls")
 })
 
-// POST LOGIN
-
+//post /logout
+app.post("/logout", (req, res) => {
+  res.clearCookie('username')
+  res.redirect("/urls")
+})
 
 
 

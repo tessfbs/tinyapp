@@ -17,11 +17,38 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <form action="/login" method="POST">
-          <input type="text" name="username" placeholder="type your username">
-          <button type="submit" class="btn btn-primary" >LOGIN</button>
-        </form>
+        <% if(username){ %>
+          <a class="nav-item nav-link ml-auto" style="text-align:center;">  Logged in as: <%= username %></a>
+          <form action="/logout" method="POST" class="login-form">
+            <button type="submit" class="custom-button" >Logout</button>
+          </form>
+        <% } else { %>
+          <form action="/login" method="POST" class="login-form">
+            <input type="text" name="username" placeholder="username">
+            <button type="submit" class="custom-button" >LOGIN</button>
+          </form>
+        <% } %>
       </div>
     </div>
   </nav>
 </header>
+
+<style>
+  .custom-button {
+    background-color: transparent;
+    border: 2px solid black;
+    padding: 8px 10px;
+    border-radius: 4px;
+    color: black;
+    float: right;
+  }
+  
+  .login-form {
+    display: flex;
+    align-items: center;
+  }
+  
+  .login-form input {
+    margin-right: 10px;
+  }
+</style>
