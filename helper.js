@@ -43,4 +43,7 @@ function urlsForUser(obj,id){
   return longUrlsByUser
 }
 
-console.log(urlsForUser(urlDatabase, "aJ48lW"))
+const bcrypt = require("bcryptjs");
+const password = "purple-monkey-dinosaur"; // found in the req.body object
+const hashedPassword = bcrypt.hashSync(password, 10);
+console.log(hashedPassword)

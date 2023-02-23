@@ -1,7 +1,8 @@
 const cookieParser = require('cookie-parser');
 const { Template } = require('ejs');
-
 const express = require("express");
+const bcrypt = require("bcryptjs");
+
 
 const app = express(); //creates a new Express application that can be used to handle incoming requests and generate responses
 
@@ -235,7 +236,7 @@ app.post("/login", (req, res) => {
   if(!userId){
     return res.status(400).send('Please provide an email AND password')
   }
-  if(users[userId].password === password && users[userId].email === email){
+  if(bcrypt.compareSync(password,users[userId].password) && users[userId].email === email){
     res.cookie('user_id', userId)
     res.redirect("/urls")
   } else {
@@ -263,8 +264,8 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const id = generateRandomString();
   const email = req.body.email
-  const password = req.body.password
-  console.log(email)
+  const password = bcrypt.hashSync(req.body.password)
+  // console.log(password)
   // Check for empty email or password
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required.' });
