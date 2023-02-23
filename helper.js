@@ -7,29 +7,16 @@ function lookupObj(obj, key, value){
   return false
 }
 
-const users = {
-  userRandomID: {
-    id: "aJ48lW",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-};
 
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-};
+function getUserByEmail(email,database) {
+  let user = {}
+  for(let id in database){
+    if(database[id].email === email){
+      user = {id, email, password:database[id].password}
+    }
+  }
+  return user
+}
 
 
 function urlsForUser(obj,id){
@@ -43,7 +30,17 @@ function urlsForUser(obj,id){
   return longUrlsByUser
 }
 
-const bcrypt = require("bcryptjs");
-const password = "purple-monkey-dinosaur"; // found in the req.body object
-const hashedPassword = bcrypt.hashSync(password, 10);
-console.log(hashedPassword)
+function generateRandomString() {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
+module.exports = {lookupObj, getUserByEmail, urlsForUser, generateRandomString}
+// const bcrypt = require("bcryptjs");
+// const password = "purple-monkey-dinosaur"; // found in the req.body object
+// const hashedPassword = bcrypt.hashSync(password, 10);
+// console.log(hashedPassword)
