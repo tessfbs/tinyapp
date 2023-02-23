@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -8,7 +14,8 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
-    <title>URL - TinyApp Example</title>
+
+    <title>ERROR: PLEASE LOG IN OR REGISTER FIRST</title>
   </head>
 
   <body>
@@ -16,20 +23,11 @@
     <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-          <h5 class="card-title">TinyURL for: <%= urls[id].longURL %></h5>
-        <p class="card-text">
-          Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
-        </p>
-      </div>
-      <div class="card-footer text-muted"></div>
-      <h1 style="color: gray;">Edit</h1>
-      <form action="/u/<%= id %>/update" method="POST">
-        <label for="input-field" style="color: gray;">
-        New Url <input type="text" name="newUrl" placeholder="edit the url" />
-      </label>
-        <button type="submit" class="btn btn-primary" >Submit</button>     
-      </form>
-    </div>
+        <h4>ERROR: PLEASE LOG IN OR REGISTER FIRST</h4>
+        <h5 class="card-title">Please <a href="/login">Log in</a> or <a href="/register">Register</a></h5>
+    <main style="margin: 1em;">
+
+    </main>
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
