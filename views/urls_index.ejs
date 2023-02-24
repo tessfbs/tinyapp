@@ -32,13 +32,13 @@
         <tbody>
           <% for (let id in urls) { %>
             <tr>
-              <% if(urls[id].userID === user_id){ %>
+              <% if(urls[id].userId === user_id){ %>
                 <td><a href="/urls/<%= id  %>"><%= id %></a></td>
                 <td><%= urls[id].longURL %></td>
                 <td><form action="/urls/<%= id %>" method="GET">
                   <button type="submit" class="btn btn-primary">Edit</button>
                 </form></td>
-                <td><form method="POST" action="/urls/<%= id %>/delete">
+                <td><form method="POST" action="/urls/<%= id %>?_method=DELETE">
                   <button type="submit" class="btn btn-primary">Delete</button>
                 </form></td>
               <% } %>

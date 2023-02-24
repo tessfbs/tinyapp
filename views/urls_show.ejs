@@ -18,18 +18,54 @@
       <div class="card-body">
           <h5 class="card-title">TinyURL for: <%= urls[id].longURL %></h5>
         <p class="card-text">
-          Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
+          Short URL ID: <a href="/u/<%= id %>" target="_blank"><%= id %></a>
+        </p>
+        <p class="card-text">
+          Visitors: <a><%= urls[id].counter %></a>
+        </p>
+        <p class="card-text">
+          Unique Visitors: <a><%= urls[id].uniqueCounter  %></a>
         </p>
       </div>
       <div class="card-footer text-muted"></div>
       <h1 style="color: gray;">Edit</h1>
-      <form action="/u/<%= id %>/update" method="POST">
+      <form action="/u/<%= id %>?_method=UPDATE" method="POST">
         <label for="input-field" style="color: gray;">
         New Url <input type="text" name="newUrl" placeholder="edit the url" />
       </label>
-        <button type="submit" class="btn btn-primary" >Submit</button>     
+        <button type="submit" class="btn btn-primary" >Update</button>     
       </form>
     </div>
+    <table class="mx-auto my-4">
+      <style>
+        table {
+          border-collapse: separate;
+          border-spacing: 0 10px;
+        }
+        th,
+        td {
+          padding: 5px;
+        }
+      </style>
+      <thead>
+        <tr>
+          <th>User ID </th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+    
+        
+          <% for(let visitor of urls[id].visitors){ %>
+                      <tr>
+                      <td><%= visitor.id %> </td>
+                      <td> <%= visitor.date  %> </td>
+                    </tr>
+            <% } %>
+      </tbody>
+    </table>
+
+    
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
