@@ -32,6 +32,7 @@ const urlDatabase = {
     visitors: [],
     counter: 0,
     uniqueCounter:0,
+    dateCreated: '20/2/2023'
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
@@ -39,6 +40,7 @@ const urlDatabase = {
     visitors: [],
     counter: 0,
     uniqueCounter:0,
+    dateCreated: '18/2/2023'
   },
 };
 
@@ -55,9 +57,12 @@ const users = {
   },
 };
 
-const UrlsVisitors = [];
-
 //*ROUTES*\\
+
+// GET /urls.json
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
 
 //GET /
 app.get("/", (req, res) => {
@@ -70,19 +75,9 @@ app.get("/", (req, res) => {
   }
 });
 
-// GET /urls.json
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-//GET /hello
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
 // GET /urls
 app.get("/urls", (req,res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id, urls: urlDatabase };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id, urls: urlDatabase}
   const userId = templateVars.user_id;
   if (userId) {
     res.render("urls_index",templateVars);
@@ -103,24 +98,62 @@ app.get("/urls/new", (req, res) => {
 
 //GET /urls/:id
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id, urls: urlDatabase, counter:visitors, UrlsVisitors: UrlsVisitors, counterUnique: unique}
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id, urls: urlDatabase}
   const urlID = req.params.id;
   const userId = templateVars.user_id;
   
+  //if a URL for the given ID does not exist:
+  if(!urlDatabase[urlID]){
+    return res.send('ERROR: This Url does not exist');
+  }
+  //if user is not logged in
   if (!userId) {
     return res.render('urls_message', templateVars);
   }
-  if ((userId) && !urlDatabase[urlID]) {
-    return res.send('ERROR: This Url is not valid');
+  //if user is logged it but does not own the URL with the given ID:
+  if ((userId) && urlDatabase[urlID].userId !== userId) {
+    return res.send('ERROR: You are not the owner of this Url');
   }
+  //if user is logged in and owns the URL for the given ID:
   if ((userId) && urlDatabase[urlID].userId === userId) {
     res.render("urls_show", templateVars);
   } else {
-    return res.send('ERROR: You can not edit this Url');
+    return res.send('ERROR: You do not have access to this Url');
   }
 });
 
-//POST /urls
+//GET /u/:id (Redirect any request to "/u/:id" to its longURL)
+app.get("/u/:id", (req, res) => {
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id, urls: urlDatabase}
+  const urlID = req.params.id;
+  const userId = templateVars.user_id;
+  const longURL = urlDatabase[req.params.id].longURL;
+
+  //keep track of how many times a given short URL is visited 
+  urlDatabase[urlID].counter++
+
+  //keep track of how many UNIQUE visitors visit each url
+  const date = new Date().toString();
+  if(!req.session.uniqueVisitorId){
+    req.session.uniqueVisitorId = generateRandomString();
+    urlDatabase[urlID].uniqueCounter++;
+  }
+  
+  //keep track of every visit (timestamp, and a generated visitor_id) and display the list on the URL edit page
+  const newVisitor = {id: req.session.uniqueVisitorId, date:date}
+  urlDatabase[urlID].visitors.push(newVisitor)
+  console.log(urlDatabase)
+
+  //if URL for the given ID does not exist:
+  if (!urlDatabase[urlID]) {
+    return res.send('ERROR: This Url is not valid');
+  }
+  //if URL for the given ID exists:
+  return res.redirect(longURL);
+
+});
+
+//POST /urls (create a new Url)
 app.post("/urls", (req, res) => {
   let templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id, urls: urlDatabase };
   const userId = templateVars.user_id;
@@ -135,6 +168,7 @@ app.post("/urls", (req, res) => {
       counter: 0,
       uniqueCounter:0,
       visitors: [],
+      dateCreated: `${new Date().getDate()}/${new Date().getMonth()+1}/${new Date().getFullYear()}`
     };
     console.log(urlDatabase, users);
     res.redirect(`/urls/${randomString}`);
@@ -144,84 +178,77 @@ app.post("/urls", (req, res) => {
   }
 });
 
-//GET /message
-app.get("/message", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id, urls: urlDatabase };
-
-  res.render('urls_message', templateVars);
-});
-
-//Redirect any request to "/u/:id" to its longURL
-let visitors = 0;
-let unique = 0;
-app.get("/u/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id, urls: urlDatabase, counter:visitors, UrlsVisitors: UrlsVisitors, counterUnique: unique}
-  const urlID = req.params.id;
-  const userId = templateVars.user_id;
-  const longURL = urlDatabase[req.params.id].longURL;
-  urlDatabase[urlID].counter++
-
-  
-  const date = new Date().toString();
-  if(!req.session.uniqueVisitorId){
-    req.session.uniqueVisitorId = generateRandomString();
-    urlDatabase[urlID].uniqueCounter++;
-    urlDatabase[urlID].visitors = {id: req.session.uniqueVisitorId, date:date};
-  }
-  
-  const newVisitor = {id: req.session.uniqueVisitorId, date:date}
-  urlDatabase[urlID].visitors.push(newVisitor)
-  console.log(urlDatabase)
-
-  if (!urlDatabase[urlID]) {
-    return res.send('ERROR: This Url is not valid');
-  }
-  return res.redirect(longURL);
-
-});
-
-//delete an url
-app.post("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id, urls: urlDatabase };
-  const urlID = req.params.id;
-  const userId = templateVars.user_id;
-  if (!userId) {
-    return res.render('urls_message', templateVars);
-  }
-  if ((userId) && urlDatabase[urlID].userId === userId) {
-    delete urlDatabase[urlID];
-    return res.redirect(`/urls`);
-  } else {
-    return res.send('You cannot delete this url');
-  }
-});
-
-//update URL
+//POST /urls/:id (Edit URL)
 app.post("/u/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id, urls: urlDatabase };
   const urlID = req.params.id;
   const userId = templateVars.user_id;
   const newUrl = req.body.newUrl;
 
+  //if user is not logged in:
   if (!userId) {
     return res.render('urls_message', templateVars);
   }
+  //if user is logged in and owns the URL for the given ID:
   if ((userId) && urlDatabase[urlID].userId === userId) {
     urlDatabase[req.params.id].longURL = newUrl;
     res.redirect(`/urls`);
+  } 
+  //if user is logged it but does not own the URL for the given ID:
+  if ((userId) && urlDatabase[urlID].userId !== userId) {
+    return res.render('urls_message', templateVars);
   } else {
     return res.send('You cannot edit this url');
   }
 
 });
 
+//POST /urls/:id (Delete URL)
+app.post("/urls/:id", (req, res) => {
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id, urls: urlDatabase };
+  const urlID = req.params.id;
+  const userId = templateVars.user_id;
+
+  //if user is not logged in:
+  if (!userId) {
+    return res.render('urls_message', templateVars);
+  }
+  //if user is logged in and owns the URL for the given ID:
+  if ((userId) && urlDatabase[urlID].userId === userId) {
+    delete urlDatabase[urlID];
+    return res.redirect(`/urls`);
+  }
+  //if user is logged it but does not own the URL for the given ID:
+  if ((userId) && urlDatabase[urlID].userId !== userId) {
+    delete urlDatabase[urlID];
+    return res.render('urls_message', templateVars);
+  } else {
+    return res.send('You cannot delete this url');
+  }
+});
+
 //GET /login
 app.get("/login", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id };
+
+  //if user is logged in:
   if (templateVars.user_id) {
     res.redirect('/urls');
   }
+  //if user is not logged in:
   res.render("urls_login", templateVars);
+});
+
+//get /register and save cookie
+app.get("/register", (req, res) => {
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id };
+
+  //if user is logged in:
+  if (templateVars.user_id) {
+    res.redirect('/urls');
+  } else {
+    res.render("urls_register", templateVars);
+  }
 });
 
 //post /login and save cookie
@@ -230,46 +257,33 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   const user = getUserByEmail(email,users);
   const userId = user.id;
-  if (!userId) {
-    return res.status(400).send('Please provide an email AND password');
+  
+  //if email or password are empty:
+  if (!userId || !password) {
+    return res.status(400).send('ERROR: Please provide Email AND Pasword');
   }
+  //if email and password params match an existing user:
   if (bcrypt.compareSync(password,users[userId].password) && users[userId].email === email) {
     req.session.user_id = userId;
     res.redirect("/urls");
-  } else {
-    res.status(400).send('ERROR: Email and/or Pasword do not match');
+  } //if email and password params don't match an existing user:
+  else {
+    res.status(400).send('ERROR: Your email and password do not match. Please try again.');
   }
 });
 
-//post /logout
-app.post("/logout", (req, res) => {
-  req.session = null; // destroy the session
-  res.clearCookie('session'); // clear the session cookie
-  res.redirect('/login');
-});
-
-//get /register and save cookie
-app.get("/register", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id };
-  if (templateVars.user_id) {
-    res.redirect('/urls');
-  } else {
-    res.render("urls_register", templateVars);
-  }
-});
-
-//post /register
+ //post /register
 app.post("/register", (req, res) => {
   const id = generateRandomString();
   const email = req.body.email;
   const password = bcrypt.hashSync(req.body.password);
-  // console.log(password)
-  // Check for empty email or password
+  
+  //if email or password are empty:
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required.' });
   }
   
-  // Check if email is already in use
+  // If email is already in use
   const user = getUserByEmail(email,users);
   const emailInUse = user.email;
   if (emailInUse) {
@@ -281,6 +295,20 @@ app.post("/register", (req, res) => {
     res.redirect("/urls");
   }
 
+});
+
+//post /logout
+app.post("/logout", (req, res) => {
+  req.session = null; // destroy the session
+  res.clearCookie('session'); // clear the session cookie
+  res.redirect('/login');
+});
+
+//GET /message
+app.get("/message", (req, res) => {
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], users, user_id: req.session.user_id, urls: urlDatabase };
+
+  res.render('urls_message', templateVars);
 });
 
 

@@ -25,6 +25,9 @@
           <tr>
             <th scope="col">Short URL ID</th>
             <th scope="col">Long URL</th>
+            <th scope="col">Date Created</th>
+            <th scope="col">Total Visits</th>
+            <th scope="col">Total Unique Visits</th>
             <th scope="col">Edit</th>
             <th scope="col">Delete</th>
           </tr>
@@ -35,6 +38,9 @@
               <% if(urls[id].userId === user_id){ %>
                 <td><a href="/urls/<%= id  %>"><%= id %></a></td>
                 <td><%= urls[id].longURL %></td>
+                <td><%= urls[id].dateCreated %></td>
+                <td><%= urls[id].counter %></td>
+                <td><%= urls[id].uniqueCounter %></td>
                 <td><form action="/urls/<%= id %>" method="GET">
                   <button type="submit" class="btn btn-primary">Edit</button>
                 </form></td>
@@ -46,6 +52,7 @@
           <% } %>
         </tbody>
       </table>
+      <a href="/urls/new">Create a New Short Link</a>
     </main>
     <!-- Bootstrap JS -->
     <script

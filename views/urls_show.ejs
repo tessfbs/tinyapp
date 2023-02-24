@@ -20,6 +20,8 @@
         <p class="card-text">
           Short URL ID: <a href="/u/<%= id %>" target="_blank"><%= id %></a>
         </p>
+        <p> Date created:<td><%= urls[id].dateCreated %></td></p>
+
         <p class="card-text">
           Visitors: <a><%= urls[id].counter %></a>
         </p>
