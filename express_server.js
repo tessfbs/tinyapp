@@ -104,7 +104,7 @@ app.get("/urls/:id", (req, res) => {
   
   //if a URL for the given ID does not exist:
   if(!urlDatabase[urlID]){
-    return res.send('ERROR: This Url does not exist');
+    return res.status(400).send('ERROR: This Url does not exist');
   }
   //if user is not logged in
   if (!userId) {
@@ -112,13 +112,13 @@ app.get("/urls/:id", (req, res) => {
   }
   //if user is logged it but does not own the URL with the given ID:
   if ((userId) && urlDatabase[urlID].userId !== userId) {
-    return res.send('ERROR: You are not the owner of this Url');
+    return res.status(400).send('ERROR: You are not the owner of this Url');
   }
   //if user is logged in and owns the URL for the given ID:
   if ((userId) && urlDatabase[urlID].userId === userId) {
     res.render("urls_show", templateVars);
   } else {
-    return res.send('ERROR: You do not have access to this Url');
+    return res.status(400).send('ERROR: You do not have access to this Url');
   }
 });
 
@@ -146,7 +146,7 @@ app.get("/u/:id", (req, res) => {
 
   //if URL for the given ID does not exist:
   if (!urlDatabase[urlID]) {
-    return res.send('ERROR: This Url is not valid');
+    return res.status(400).send('ERROR: This Url is not valid');
   }
   //if URL for the given ID exists:
   return res.redirect(longURL);
@@ -198,7 +198,7 @@ app.post("/u/:id", (req, res) => {
   if ((userId) && urlDatabase[urlID].userId !== userId) {
     return res.render('urls_message', templateVars);
   } else {
-    return res.send('You cannot edit this url');
+    return res.status(400).send('You cannot edit this url');
   }
 
 });
@@ -223,7 +223,7 @@ app.post("/urls/:id", (req, res) => {
     delete urlDatabase[urlID];
     return res.render('urls_message', templateVars);
   } else {
-    return res.send('You cannot delete this url');
+    return res.status(400).send('You cannot delete this url');
   }
 });
 
